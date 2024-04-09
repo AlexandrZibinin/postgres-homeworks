@@ -11,6 +11,9 @@ WHERE discontinued = 1
 
 -- 4. Удалить из products товары, снятые с продажи (discontinued = 1)
 -- Для 4-го пункта может потребоваться удаление ограничения, связанного с foreign_key. Подумайте, как это можно решить, чтобы связь с таблицей order_details все же осталась.
-ALTER TABLE products DISABLE TRIGGER ALL;
-DELETE FROM products WHERE discontinued = 1;
-ALTER TABLE products ENABLE TRIGGER ALL;
+CREATE TABLE temp_products AS
+SELECT product_id FROM products WHERE discontinued = 1;
+INSERT INTO temp_products SELECT product_id FROM products WHERE discontinued = 1;
+DELETE FROM products WHERE product_id IN (SELECT product_id FROM temp_products);
+DELETE FROM order_details WHERE product_id IN (SELECT product_id FROM temp_products);
+DROP TABLE temp_products;
